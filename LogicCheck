@@ -1,0 +1,172 @@
+internal static class KiemTraDuLieu
+{
+    private const int DoDaiTaiKhoanDangNhapToiDa = 20;
+
+    private static readonly Regex MauEmail =
+        new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
+
+    private static readonly Regex MauSoDienThoai =
+        new Regex(@"^0\d{9}$", RegexOptions.Compiled);
+
+    private static readonly Regex MauKyTuTaiKhoan =
+        new Regex(@"^[A-Za-z0-9_]+$", RegexOptions.Compiled);
+
+    // ---------------- FORM ĐĂNG NHẬP ----------------
+    public static bool KiemTraTaiKhoanDangNhap(string dauVaoTho, out string daXoaKhoangTrang, out string loi)
+    {
+        loi = null;
+        daXoaKhoangTrang = (dauVaoTho ?? string.Empty).Trim();
+
+        if (string.IsNullOrEmpty(daXoaKhoangTrang))
+        {
+            loi = "Vui lòng nhập tài khoản";
+            return false;
+        }
+
+        if (daXoaKhoangTrang.Length > DoDaiTaiKhoanDangNhapToiDa)
+        {
+            loi = "Tài khoản không hợp lệ";
+            return false;
+        }
+
+        return true;
+    }
+
+    public static bool KiemTraMatKhauDangNhap(string matKhau, out string loi)
+    {
+        loi = null;
+
+        if (string.IsNullOrEmpty(matKhau))
+        {
+            loi = "Vui lòng nhập mật khẩu";
+            return false;
+        }
+
+        return true;
+    }
+// ---------------- FORM ĐĂNG KÝ ----------------
+    public static bool KiemTraTaiKhoanDangKy(string dauVao, out string loi)
+    {
+        loi = null;
+        string giaTri = dauVao ?? string.Empty;
+
+        if (string.IsNullOrEmpty(giaTri))
+        {
+            loi = "Vui lòng nhập tài khoản";
+            return false;
+        }
+        if (giaTri.Length < 4)
+        {
+            loi = "Tài khoản phải có ít nhất 4 ký tự";
+            return false;
+        }
+        if (giaTri.Length > 20)
+        {
+            loi = "Tài khoản không được vượt quá 20 ký tự";
+            return false;
+        }
+        if (!MauKyTuTaiKhoan.IsMatch(giaTri))
+        {
+            loi = "Tài khoản chỉ được chứa chữ, số và dấu gạch dưới";
+            return false;
+        }
+        if (char.IsDigit(giaTri[0]))
+        {
+            loi = "Tài khoản không được bắt đầu bằng số";
+            return false;
+        }
+
+        return true;
+    }
+
+    public static bool LaEmailHopLe(string giaTri) => MauEmail.IsMatch(giaTri ?? string.Empty);
+
+    public static bool LaSoDienThoaiHopLe(string giaTri) => MauSoDienThoai.IsMatch(giaTri ?? string.Empty);
+
+    public static bool KiemTraEmailHoacSoDienThoaiDangKy(string dauVao, out string loi)
+    {
+        loi = null;
+        string giaTri = (dauVao ?? string.Empty).Trim();
+
+        if (string.IsNullOrEmpty(giaTri))
+        {
+            loi = "Vui lòng nhập email hoặc số điện thoại";
+            return false;
+        }
+
+        bool emailHopLe = LaEmailHopLe(giaTri);
+        bool soDienThoaiHopLe = LaSoDienThoaiHopLe(giaTri);
+
+        if (emailHopLe || soDienThoaiHopLe)
+            return true;
+
+        bool giongEmail = giaTri.Contains("@");
+        bool giongSoDienThoai = Regex.IsMatch(giaTri, @"^[0-9+]+$");
+
+        if (giongEmail && !giongSoDienThoai)
+        {
+            loi = "Email không hợp lệ";
+            return false;
+        }
+        if (giongSoDienThoai && !giongEmail)
+        {
+            loi = "Số điện thoại không hợp lệ";
+            return false;
+        }
+
+        loi = "Vui lòng nhập đúng định dạng email hoặc số điện thoại";
+        return false;
+    }
+
+    public static bool KiemTraMatKhauDangKy(string matKhau, out string loi)
+    {
+        loi = null;
+        string giaTri = matKhau ?? string.Empty;
+
+        if (string.IsNullOrEmpty(giaTri))
+        {
+            loi = "Vui lòng nhập mật khẩu";
+            return false;
+        }
+        if (giaTri.Length < 6)
+        {
+            loi = "Mật khẩu phải có ít nhất 6 ký tự";
+            return false;
+        }
+        if (!giaTri.Any(char.IsUpper))
+        {
+            loi = "Mật khẩu cần ít nhất 1 chữ in hoa";
+            return false;
+        }
+        if (!giaTri.Any(char.IsDigit))
+        {
+            loi = "Mật khẩu cần ít nhất 1 chữ số";
+            return false;
+        }
+        if (giaTri.Any(char.IsWhiteSpace))
+        {
+            loi = "Mật khẩu không được chứa khoảng trắng";
+            return false;
+        }
+
+        return true;
+    }
+
+    public static bool KiemTraXacNhanMatKhauDangKy(string matKhauXacNhan, string matKhau, out string loi)
+    {
+        loi = null;
+
+        if (string.IsNullOrEmpty(matKhauXacNhan))
+        {
+            loi = "Vui lòng nhập lại mật khẩu";
+            return false;
+        }
+        if (matKhauXacNhan != matKhau)
+        {
+            loi = "Mật khẩu xác nhận không khớp";
+            return false;
+        }
+
+        return true;
+    }
+}
